@@ -1,15 +1,10 @@
 from rest_framework import serializers
-
+from users.models import UserSavedVideo
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-class UserLoginSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the user login 
-    """
+class UserSavedVideoSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ['id', 'username', 'password']
-
-       
+        model = UserSavedVideo
+        fields = ['id', 'user', 'video_id', 'title', 'description', 'thumbnail_url']
