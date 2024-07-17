@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'your-default-secret-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = 'True'
 
 ALLOWED_HOSTS = ['*']
 
@@ -79,8 +79,22 @@ WSGI_APPLICATION = 'mttBackend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# Default to PostgreSQL
+database_config = dj_database_url.config(default=os.getenv('DATABASE_URL'))
+
+# Switch to MySQL if MYSQL_DATABASE is set
+if os.getenv('MYSQLDATABASE'):
+    database_config = {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('MYSQLDATABASE'),
+        'USER': os.getenv('MYSQLUSER'),
+        'PASSWORD': os.getenv('MYSQLPASSWORD'),
+        'HOST': os.getenv('MYSQLHOST'),
+        'PORT': os.getenv('MYSQLPORT', '3306'),
+    }
+
 DATABASES = {
-    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+    'default': database_config
 }
 
 

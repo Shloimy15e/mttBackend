@@ -11,6 +11,7 @@ gunicorn = "*"
 dj-database-url = "*"
 whitenoise = "*"
 psycopg2-binary = "*"
+mysqlclient = "*"
 
 [dev-packages]
 
