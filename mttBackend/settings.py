@@ -24,7 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "your-default-secret-key")
 
-CSRF_TRUSTED_ORIGINS = [os.environ.get('RAILWAY_APP_URL', 'https://mttbackend-production.up.railway.app')]
+CSRF_TRUSTED_ORIGINS = [
+    os.environ.get("RAILWAY_APP_URL", "https://mttbackend-production.up.railway.app")
+]
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -45,6 +47,7 @@ INSTALLED_APPS = [
     "users.apps.UsersConfig",
     "api.apps.ApiConfig",
     "rest_framework",
+    "rest_framework.authtoken",
     "djoser",
 ]
 
@@ -139,3 +142,12 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# Set up rest_framework
+RESR_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ),
+}
