@@ -34,10 +34,12 @@ class VideoViewSet(ModelViewSet):
                 except Exception as e:
                     errors.append({"video": video, "error": str(e)})
             
-            if errors:
+            if errors and created_videos:
                 return Response({"created_videos": created_videos, "errors": errors}, status=status.HTTP_206_PARTIAL_CONTENT)
-            else:
+            elif created_videos:
                 return Response({"created_videos": created_videos}, status=status.HTTP_201_CREATED)
+            else:
+                return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
