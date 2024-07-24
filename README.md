@@ -42,15 +42,24 @@ User api is managed by djoser
 
 ### Content management
 
-Client can save videos to a users personal saved list or can create a new list - public or private - and save to videos to created list/s. 
+Client can save videos to a users personal saved list or can create a new list - public or private - and save to videos to created list/s.
 
 #### API endpoints
 
+Content APIs
+
+* **api/user-saved-videos/** requires token authentication
+* * GET retrieve all
+  * POST saves a video takes a video_id in body
+  * **/{save_id}**
+  * * GET retrieves one instance
+    * DELETE destroys instance
+
 ##### To be defined later
 
+user video lists 
 
 ## What this app might have
-
 
 * The app might also host the data of all videos and serve it per API call
 * The app might also keep track of likes and comments on videos

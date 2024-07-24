@@ -12,6 +12,8 @@ dj-database-url = "*"
 whitenoise = "*"
 psycopg2-binary = "*"
 mysqlclient = "*"
+mysql = "*"
+pylint-django = "*"
 
 [dev-packages]
 

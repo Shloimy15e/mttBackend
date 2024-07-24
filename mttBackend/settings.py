@@ -28,7 +28,6 @@ CSRF_TRUSTED_ORIGINS = [
     os.environ.get("RAILWAY_APP_URL", "https://mttbackend-production.up.railway.app")
 ]
 
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = "True"
 
@@ -45,6 +44,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "users.apps.UsersConfig",
+    "videos.apps.VideosConfig",
     "api.apps.ApiConfig",
     "rest_framework",
     "rest_framework.authtoken",
@@ -87,6 +87,7 @@ WSGI_APPLICATION = "mttBackend.wsgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 # Default to PostgreSQL
+database_config = {}
 if os.getenv("DATABASE_URL"):
     database_config = dj_database_url.config(default=os.getenv("DATABASE_URL"))
 elif os.getenv("MYSQLDATABASE"):
@@ -97,6 +98,11 @@ elif os.getenv("MYSQLDATABASE"):
         "PASSWORD": os.getenv("MYSQLPASSWORD"),
         "HOST": os.getenv("MYSQLHOST"),
         "PORT": os.getenv("MYSQLPORT", "3306"),
+    }
+else: 
+    database_config = {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 
 DATABASES = {"default": database_config}
