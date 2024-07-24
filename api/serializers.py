@@ -2,9 +2,24 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from users.models import UserSavedVideo
 from users.models import UserVideoList
+from videos.models import Video
 
 User = get_user_model()
 
+class VideoSerializer(serializers.ModelSerializer):
+    """
+    A serializer for the Video model.
+    
+    Returns:
+        dict: Serialized data for the Video model fields.
+    """
+    
+    class Meta:
+        """
+        Meta options for the VideoSerializer class.
+        """
+        model = Video
+        fields = ["id", "video_id", "title", "topic", "subtopic", "likes"]
 
 class UserSavedVideoSerializer(serializers.ModelSerializer):
     """

@@ -2,11 +2,95 @@ from django.contrib.auth import authenticate
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authentication import TokenAuthentication
 
 
 from .serializers import UserSavedVideoSerializer
+from .serializers import VideoSerializer
+
+class VideoViewSet(ModelViewSet):
+    """
+    A viewset for the Video model.
+    """
+    serializer_class = VideoSerializer
+    queryset = VideoSerializer.Meta.model.objects.all()
+    permission_classes = [AllowAny]
+    
+    def create(self, request, *args, **kwargs):
+        """
+        create one or more video instances.
+        """
+        try:
+            videos = request.data.get("videos")
+            created_videos = []
+            errors = []
+            for video in videos:
+                try:
+                    serializer = self.get_serializer(data=video)
+                    serializer.is_valid(raise_exception=True)
+                    self.perform_create(serializer)
+                    created_videos.append(serializer.data)
+                except Exception as e:
+                    errors.append({"video": video, "error": str(e)})
+            
+            if errors:
+                return Response({"created_videos": created_videos, "errors": errors}, status=status.HTTP_201_PARTIAL_CONTENT)
+            else:
+                return Response({"created_videos": created_videos}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    def list(self, request, *args, **kwargs):
+        """
+        List all videos.
+        """
+        try: 
+            queryset = self.filter_queryset(self.get_queryset())
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve a single video.
+        """
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    def update(self, request, *args, **kwargs):
+        """
+        Update a video.
+        """
+        try:
+            partial = kwargs.pop('partial', False)
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    def destroy(self, request, *args, **kwargs):
+        """
+        Delete a video.
+        """
+        try:
+            if not request.user.is_staff:
+                return Response({"error": "Must be admin user"}, status=status.HTTP_403_FORBIDDEN)
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
 
 
 # Create your views here.
