@@ -33,7 +33,7 @@ User api is managed by djoser
   * GET requires authentication
   * * Admin token: returns all users
     * User token: return user info
-* **auth/users/{user_id}**  - GET DELETE PUT PATCH**
+* **auth/users/{user_id}**  - GET DELETE PUT PATCH
 * * Admin token: can be used on any user
   * User token: can be used for own user_id and works as /users/me see below
 * **auth/users/me**  -  GET PUT PATCH DELETE requires authentication
@@ -51,13 +51,20 @@ Content APIs
 * **api/user-saved-videos/** requires token authentication
 * * GET retrieve all
   * POST saves a video takes a video_id in body
-  * **/{save_id}**
+  * **/{save_id}/**
   * * GET retrieves one instance
     * DELETE destroys instance
+* **api/videos/**
+* * GET lists all videos
+  * POST saves on or more videos
+  * **/{id}/**
+  * * GET retrives one video
+    * PUT updates on video
+    * DELETE Admin token required to delete one video
 
 ##### To be defined later
 
-user video lists 
+user video lists
 
 ## What this app might have
 
