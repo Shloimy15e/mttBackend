@@ -35,7 +35,7 @@ class VideoViewSet(ModelViewSet):
                     errors.append({"video": video, "error": str(e)})
             
             if errors:
-                return Response({"created_videos": created_videos, "errors": errors}, status=status.HTTP_201_PARTIAL_CONTENT)
+                return Response({"created_videos": created_videos, "errors": errors}, status=status.HTTP_206_PARTIAL_CONTENT)
             else:
                 return Response({"created_videos": created_videos}, status=status.HTTP_201_CREATED)
         except Exception as e:
