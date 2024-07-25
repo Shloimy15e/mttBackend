@@ -23,7 +23,7 @@ class Video(models.Model):
     """
 
     video_id = models.CharField(max_length=255, unique=True)
-    title = models.CharField(max_length=255, encoding='utf-8')    
+    title = models.TextField(max_length=255)    
     topic = models.CharField(max_length=50)
     subtopic = models.CharField(max_length=50, blank=True)
     description = models.TextField(blank=True, null=True)    
