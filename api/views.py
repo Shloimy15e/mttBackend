@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.filters import OrderingFilter
+from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
 
 class CustomLimitOffsetPagination(LimitOffsetPagination):
@@ -108,6 +109,8 @@ class VideoViewSet(ModelViewSet):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
+        
+    @action(methods=['delete'], detail=False, url_path='delete-all')
     def delete_all(self, request):
         """
         Delete all videos.
