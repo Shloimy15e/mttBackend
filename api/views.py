@@ -93,6 +93,7 @@ class VideoViewSet(ModelViewSet):
             return Response(serializer.data)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
         
     def destroy(self, request, *args, **kwargs):
         """
@@ -106,7 +107,19 @@ class VideoViewSet(ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    
+        
+    def delete_all(self, request):
+        """
+        Delete all videos.
+        """
+        try:
+            if not request.user.is_staff:
+                return Response({"error": "Must be admin user"}, status=status.HTTP_403_FORBIDDEN)
+            self.queryset.all().delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
     
 
 
