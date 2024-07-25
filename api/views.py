@@ -76,9 +76,11 @@ class VideoViewSet(ModelViewSet):
                         updated_videos.append(serializer.data)
                     except self.queryset.model.DoesNotExist:
                         serializer = self.get_serializer(data=video)
-                        serializer.is_valid(raise_exception=True)
-                        self.perform_create(serializer)
-                        created_videos.append(serializer.data)
+                        if serializer.is_valid():
+                            self.perform_create(serializer)
+                            created_videos.append(serializer.data)
+                        else:
+                            errors.append({"video": video, "error": serializer.errors})
                     except Exception as e:
                         errors.append({"video": video, "error": str(e)})
                 else:
