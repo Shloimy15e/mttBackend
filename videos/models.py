@@ -26,7 +26,12 @@ class Video(models.Model):
     title = models.CharField(max_length=255)
     topic = models.CharField(max_length=50)
     subtopic = models.CharField(max_length=50, blank=True)
+    description = models.TextField(blank=True)
+    tags = models.JSONField(default=list)
+    duration = models.CharField(max_length=50, blank=True)
+    publishedAt = models.CharField(max_length=50, blank=True)
     likes = models.IntegerField(default=0)
+    views = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.title} - {self.topic}"
