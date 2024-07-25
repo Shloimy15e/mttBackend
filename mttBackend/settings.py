@@ -110,6 +110,7 @@ elif os.getenv("MYSQLDATABASE"):
         "PASSWORD": os.getenv("MYSQLPASSWORD"),
         "HOST": os.getenv("MYSQLHOST"),
         "PORT": os.getenv("MYSQLPORT", "3306"),
+        "OPTIONS": {"charset": "utf8mb4", "collation": "utf8mb4_unicode_ci"},
     }
 else: 
     database_config = {
@@ -171,3 +172,5 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 50,
 }
+
+DEFAULT_CHARSET = "utf-8"
