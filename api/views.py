@@ -4,6 +4,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.filters import OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
+
+class CustomLimitOffsetPagination(LimitOffsetPagination):
+    default_limit = 50
+    max_limit = 100
 
 
 from .serializers import UserSavedVideoSerializer
@@ -16,6 +23,9 @@ class VideoViewSet(ModelViewSet):
     serializer_class = VideoSerializer
     queryset = VideoSerializer.Meta.model.objects.all()
     permission_classes = [AllowAny]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ['topic', 'video_id',]
+    ordering_fields = ['likes']
     
     def create(self, request, *args, **kwargs):
         """
@@ -48,7 +58,12 @@ class VideoViewSet(ModelViewSet):
         List all videos.
         """
         try: 
+            paginator = CustomLimitOffsetPagination()
             queryset = self.filter_queryset(self.get_queryset())
+            page = paginator.paginate_queryset(queryset, request)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return paginator.get_paginated_response(serializer.data)
             serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data)
         except Exception as e:

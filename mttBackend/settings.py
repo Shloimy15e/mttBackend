@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_filters",
+    "corsheaders",
     "users.apps.UsersConfig",
     "videos.apps.VideosConfig",
     "api.apps.ApiConfig",
@@ -51,7 +53,17 @@ INSTALLED_APPS = [
     "djoser",
 ]
 
+CORS_ALLOW_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:8000",
+    "https://mttbackend-production.up.railway.app",
+    "https://mytorahtoday.netlify.app",
+    "https://mytorahtoday.com",
+    "https://www.mytorahtoday.com",
+]
+
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -156,4 +168,6 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 50,
 }
