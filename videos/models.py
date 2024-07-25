@@ -23,10 +23,10 @@ class Video(models.Model):
     """
 
     video_id = models.CharField(max_length=255, unique=True)
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, encoding='utf-8')    
     topic = models.CharField(max_length=50)
     subtopic = models.CharField(max_length=50, blank=True)
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True, null=True)    
     tags = models.JSONField(default=list)
     duration = models.CharField(max_length=50, blank=True)
     publishedAt = models.CharField(max_length=50, blank=True)
