@@ -1,8 +1,9 @@
 from django.contrib.auth import authenticate
+from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.filters import OrderingFilter
@@ -23,10 +24,22 @@ class VideoViewSet(ModelViewSet):
     """
     serializer_class = VideoSerializer
     queryset = VideoSerializer.Meta.model.objects.all()
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdminUser | AllowAny]
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy', 'update_and_create_bulk', 'delete_all']:
+            return [IsAdminUser()]
+        return [AllowAny()]    
+    
     filter_backends = [DjangoFilterBackend, OrderingFilter]
-    filterset_fields = ['topic', 'video_id',]
-    ordering_fields = ['likes']
+    filterset_fields = {
+        'topic': ['exact'],
+        'video_id': ['exact'],
+        'subtopic': ['exact'],
+        'likes': ['exact', 'gte', 'lte', 'range'],
+        'views': ['exact', 'gte', 'lte', 'range']
+    }    
+    ordering_fields = ['likes',  'views', 'publishedAt']
     
     def create(self, request, *args, **kwargs):
         """
@@ -128,22 +141,33 @@ class VideoViewSet(ModelViewSet):
         
     def retrieve(self, request, *args, **kwargs):
         """
-        Retrieve a single video.
+        Retrieve a single video by id or video_id.
         """
         try:
-            instance = self.get_object()
-            serializer = self.get_serializer(instance)
+            lookup_field = 'video_id' if 'video_id' in self.kwargs else self.lookup_field
+            queryset = self.filter_queryset(self.get_queryset())
+            obj = get_object_or_404(queryset, **{lookup_field: self.kwargs[lookup_field]})
+
+            serializer = self.get_serializer(obj)
             return Response(serializer.data)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
     def update(self, request, *args, **kwargs):
         """
-        Update a video.
+        Update a video by id or video_id.
+        Requires admin user.
         """
         try:
             partial = kwargs.pop('partial', False)
-            instance = self.get_object()
+            # Try to get the object by id first
+            try:
+                instance = self.get_object()
+            except Exception:
+                # If not found, try to get the object by video_id
+                video_id = request.data.get('video_id') or kwargs.get('pk')
+                instance = self.queryset.get(video_id=video_id)
+
             serializer = self.get_serializer(instance, data=request.data, partial=partial)
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer)
@@ -154,26 +178,26 @@ class VideoViewSet(ModelViewSet):
         
     def destroy(self, request, *args, **kwargs):
         """
-        Delete a video.
+        Delete a video by id or video_id.
         """
         try:
-            if not request.user.is_staff:
-                return Response({"error": "Must be admin user"}, status=status.HTTP_403_FORBIDDEN)
-            instance = self.get_object()
+            if video_id := request.query_params.get('video_id'):
+                instance = self.queryset.filter(video_id=video_id, user=request.user).first()
+            else:
+                instance = self.get_object()
+            if not instance:
+                return Response({"error": "Video not found"}, status=status.HTTP_404_NOT_FOUND)
+
             self.perform_destroy(instance)
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
-        
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)        
     @action(methods=['delete'], detail=False, url_path='delete-all')
     def delete_all(self, request):
         """
         Delete all videos.
         """
         try:
-            if not request.user.is_staff:
-                return Response({"error": "Must be admin user"}, status=status.HTTP_403_FORBIDDEN)
             self.queryset.all().delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
