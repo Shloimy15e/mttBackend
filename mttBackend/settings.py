@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_filters",
     "corsheaders",
+    "topics.apps.TopicsConfig",
     "users.apps.UsersConfig",
     "videos.apps.VideosConfig",
     "api.apps.ApiConfig",
