@@ -11,15 +11,15 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from django_filters.rest_framework import DjangoFilterBackend
 
+from .serializers import UserSavedVideoSerializer
+from .serializers import VideoSerializer
+from .serializers import TopicSerializer
+from .serializers import SubtopicSerializer
+
 
 class CustomLimitOffsetPagination(LimitOffsetPagination):
     default_limit = 50
-    max_limit = 100
-
-
-from .serializers import UserSavedVideoSerializer
-from .serializers import VideoSerializer
-
+    max_limit = None
 
 class VideoViewSet(ModelViewSet):
     """
@@ -255,8 +255,146 @@ class VideoViewSet(ModelViewSet):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+class TopicViewSet(ModelViewSet):
+    """
+    A viewset for the Topic model.
+    """
+    serializer_class = TopicSerializer
+    queryset = TopicSerializer.Meta.model.objects.all()
+    permission_classes = [IsAdminUser | AllowAny]
+    
+    def get_permissions(self):
+        return [AllowAny()] if self.action in ["list", "retrieve"] else [IsAdminUser()]
+    
+    def list(self, request, *args, **kwargs):
+        """
+        List all topics.
+        """
+        try:
+            queryset = self.filter_queryset(self.get_queryset())
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve a single topic by id.
+        """
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    def create(self, request, *args, **kwargs):
+        """
+        Create a new topic.
+        """
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    def update(self, request, *args, **kwargs):
+        """
+        Update a topic by id.
+        """
+        try:
+            partial = kwargs.pop("partial", False)
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    def destroy(self, request, *args, **kwargs):
+        """
+        Delete a topic by id.
+        """
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+class SubtopicViewSet(ModelViewSet):
+    """
+    A viewset for the Subtopic model.
+    """
+    serializer_class = SubtopicSerializer
+    queryset = SubtopicSerializer.Meta.model.objects.all()
+    permission_classes = [IsAdminUser | AllowAny]
 
-# Create your views here.
+    def get_permissions(self):
+        return [AllowAny()] if self.action in ["list", "retrieve"] else [IsAdminUser()]
+
+    def list(self, request, *args, **kwargs):
+        """
+        List all subtopics.
+        """
+        try:
+            queryset = self.filter_queryset(self.get_queryset())
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve a single subtopic by id.
+        """
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    def create(self, request, *args, **kwargs):
+            """
+            Create a new subtopic.
+            """
+            try:
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                self.perform_create(serializer)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            
+    def update(self, request, *args, **kwargs):
+                """
+                Update a subtopic by id.
+                """
+                try:
+                    partial = kwargs.pop("partial", False)
+                    instance = self.get_object()
+                    serializer = self.get_serializer(instance, data=request.data, partial=partial)
+                    serializer.is_valid(raise_exception=True)
+                    self.perform_update(serializer)
+                    return Response(serializer.data)
+                except Exception as e:
+                    return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    def destroy(self, request, *args, **kwargs):
+                """
+                Delete a subtopic by id.
+                """
+                try:
+                    instance = self.get_object()
+                    self.perform_destroy(instance)
+                    return Response(status=status.HTTP_204_NO_CONTENT)
+                except Exception as e:
+                    return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                
 class UserSavedVideoViewSet(ModelViewSet):
     """
     A viewset for the UserSavedVideo model.

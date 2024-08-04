@@ -3,6 +3,8 @@ from django.contrib.auth import get_user_model
 from users.models import UserSavedVideo
 from users.models import UserVideoList
 from videos.models import Video
+from topics.models import Topic
+from topics.models import Subtopic
 
 User = get_user_model()
 
@@ -20,6 +22,32 @@ class VideoSerializer(serializers.ModelSerializer):
         """
         model = Video
         fields = ["id", "video_id", "title", "topic", "subtopic", "description", "tags", "duration", "publishedAt", "likes", "views"]
+        
+class TopicSerializer(serializers.ModelSerializer):
+    """
+    A serializer for the Topic model.
+    Returns:
+        dict: Serialized data for the Topic model fields.
+    """
+    class Meta:
+        """
+        Meta options for the TopicSerializer class.
+        """
+        model = Topic
+        fields = ["id", "name", "description"]
+        
+class SubtopicSerializer(serializers.ModelSerializer):
+    """
+    A serializer for the Subtopic model.
+    Returns:
+        dict: Serialized data for the Subtopic model fields.
+    """
+    class Meta:
+        """
+        Meta options for the SubtopicSerializer class.
+        """
+        model = Subtopic
+        fields = ["id", "topic", "name", "description"]
 
 class UserSavedVideoSerializer(serializers.ModelSerializer):
     """
