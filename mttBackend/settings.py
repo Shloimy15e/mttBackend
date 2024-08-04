@@ -112,8 +112,8 @@ elif os.getenv("MYSQLDATABASE"):
         "HOST": os.getenv("MYSQLHOST"),
         "PORT": os.getenv("MYSQLPORT", "3306"),
         "OPTIONS": {
-            "charset": "utf8mb4",
-            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'; SET collation_connection='utf8mb4_unicode_ci';",
+            #"charset": "utf8mb4",
+            #"init_command": "SET sql_mode='STRICT_TRANS_TABLES'; SET collation_connection='utf8mb4_unicode_ci';",
         },
     }
 else:
