@@ -19,7 +19,7 @@ class VideoSerializer(serializers.ModelSerializer):
         Meta options for the VideoSerializer class.
         """
         model = Video
-        fields = ["id", "video_id", "title", "topic", "subtopic", "likes"]
+        fields = ["id", "video_id", "title", "topic", "subtopic", "description", "tags", "duration", "publishedAt", "likes", "views"]
 
 class UserSavedVideoSerializer(serializers.ModelSerializer):
     """
