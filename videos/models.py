@@ -36,4 +36,4 @@ class Video(models.Model):
     views = models.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.title} - {self.topic}"
+        return f"{self.title} - {self.subtopic_id}"
