@@ -29,3 +29,7 @@ class Subtopic(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return self.name
+    
