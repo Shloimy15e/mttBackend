@@ -10,14 +10,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
+        migrations.RenameField(
             model_name='video',
-            name='topic',
-            field=models.CharField(blank=True, max_length=50),
+            old_name='topic_id',
+            new_name='topic'
         ),
-        migrations.AlterField(
+        migrations.RenameField(
             model_name='video',
-            name='subtopic',
-            field=models.CharField(blank=True, max_length=50),
+            old_name='subtopic_id',
+            new_name='subtopic'
         ),
     ]
