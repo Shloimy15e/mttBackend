@@ -26,7 +26,7 @@ class Video(models.Model):
 
     video_id = models.CharField(max_length=255, unique=True)
     title = models.TextField(max_length=255)    
-    topic = models.CharField(max_length=50, blank=True)
+    topic = models.ForeignKey(Topic, on_delete=models.PROTECT, related_name="videos")
     subtopic = models.CharField(max_length=50, blank=True)
     description = models.TextField(blank=True, null=True)    
     tags = models.JSONField(default=list)
@@ -36,4 +36,4 @@ class Video(models.Model):
     views = models.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.title} - {self.subtopic_id}"
+        return f"{self.title} - {self.subtopic}"
