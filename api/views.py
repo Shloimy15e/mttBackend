@@ -44,7 +44,7 @@ class VideoViewSet(ModelViewSet):
 
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = {
-        "topic": ["exact"],
+        "topic": ["exact", "icontains"],
         "video_id": ["exact"],
         "subtopic": ["exact"],
         "likes": ["exact", "gte", "lte", "range"],
