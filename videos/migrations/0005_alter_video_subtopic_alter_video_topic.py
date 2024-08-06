@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name="video",
-            name="topic_temp",  
+            name="subtopic_temp",  
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, related_name='videos_temp', to='topics.Subtopic'),
         ),
         migrations.RunPython(set_video_subtopic_foreign_keys),
