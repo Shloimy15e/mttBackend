@@ -27,7 +27,7 @@ class Video(models.Model):
     video_id = models.CharField(max_length=255, unique=True)
     title = models.TextField(max_length=255)    
     topic = models.ForeignKey(Topic, on_delete=models.PROTECT, related_name="videos")
-    subtopic = models.CharField(max_length=50, blank=True)
+    subtopic = models.ForeignKey(Subtopic, on_delete=models.PROTECT, related_name="videos")
     description = models.TextField(blank=True, null=True)    
     tags = models.JSONField(default=list)
     duration = models.CharField(max_length=50, blank=True)
