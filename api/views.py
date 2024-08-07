@@ -19,7 +19,41 @@ class CustomLimitOffsetPagination(LimitOffsetPagination):
 
 from .serializers import UserSavedVideoSerializer
 from .serializers import VideoSerializer
+from .serializers import TopicSerializer
+from .serializers import SubtopicSerializer
 
+
+class TopicViewSet(ModelViewSet):
+    """
+    A viewset for the Topic model.
+    """ 
+    serializer_class = TopicSerializer
+    queryset = TopicSerializer.Meta.model.objects.all()
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = {
+        "id": ["exact"],
+        "name": ["iexact"],
+        "description": ["exact", "icontains"],
+    }
+    ordering_fields = ["id", "name"]
+    
+class SubtopicViewSet(ModelViewSet):
+    """
+    A viewset for the Subtopic model.
+    """
+    serializer_class = SubtopicSerializer
+    queryset = SubtopicSerializer.Meta.model.objects.all()
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = {
+        "id": ["exact"],
+        "name": ["iexact"],
+        "description": ["exact", "icontains"],
+        "topic": ["exact"],
+        "topic__name": ["iexact"],
+    }
+    ordering_fields = ["id", "name", "topic"]
+    
+    
 
 class VideoViewSet(ModelViewSet):
     """
@@ -45,8 +79,10 @@ class VideoViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = {
         "topic": ["exact"],
+        "topic__name": ["exact", "iexact"],        
         "video_id": ["exact"],
         "subtopic": ["exact"],
+        "subtopic__name": ["iexact"],
         "likes": ["exact", "gte", "lte", "range"],
         "views": ["exact", "gte", "lte", "range"],
     }

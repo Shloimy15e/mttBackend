@@ -3,8 +3,57 @@ from django.contrib.auth import get_user_model
 from users.models import UserSavedVideo
 from users.models import UserVideoList
 from videos.models import Video
+from topics.models import Topic
+from topics.models import Subtopic
 
 User = get_user_model()
+
+class TopicSerializer(serializers.ModelSerializer):
+    """
+    A serializer for the topic model
+    
+    Returns:
+        dict: Serialized data for the topic model fields.
+    """
+    
+    # Return all subtopics in this topic
+    subtopics = serializers.SerializerMethodField()
+    def get_subtopics(self, obj):
+        """
+        Get subtopics for the topic.
+
+        Args:
+            obj (Topic): The topic object.
+
+        Returns:
+            list: List of subtopics for the topic.
+        """
+        subtopics = Subtopic.objects.filter(topic=obj)
+        return SubtopicSerializer(subtopics, many=True).data
+    
+    class Meta:
+        """
+        Meta options for the TopicSerializer class.
+        """
+        model = Topic
+        fields = ["id", "name", "description", "subtopics"]
+        
+class SubtopicSerializer(serializers.ModelSerializer):
+    """
+    A serializer for the subtopic model
+
+    Returns:
+        dict: Serialized data for the subtopic model fields.
+    """
+    topic_name = serializers.CharField(source='topic.name', read_only=True)
+    
+    class Meta:
+        """
+        Meta options for the SubtopicSerializer class.
+        """
+        model = Subtopic
+        fields = ["id", "name", "description", "topic", "topic_name"] 
+    
 
 class VideoSerializer(serializers.ModelSerializer):
     """
@@ -14,12 +63,15 @@ class VideoSerializer(serializers.ModelSerializer):
         dict: Serialized data for the Video model fields.
     """
     
+    subtopic_name = serializers.CharField(source='subtopic.name', read_only=True)
+    topic_name = serializers.CharField(source='topic.name', read_only=True)    
+    
     class Meta:
         """
         Meta options for the VideoSerializer class.
         """
         model = Video
-        fields = ["id", "video_id", "title", "topic", "subtopic", "description", "tags", "duration", "publishedAt", "likes", "views"]
+        fields = ["id", "video_id", "title", "topic", "topic_name", "subtopic", "subtopic_name", "description", "tags", "duration", "publishedAt", "likes", "views"]
 
 class UserSavedVideoSerializer(serializers.ModelSerializer):
     """
