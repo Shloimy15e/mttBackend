@@ -65,13 +65,38 @@ class VideoSerializer(serializers.ModelSerializer):
     
     subtopic_name = serializers.CharField(source='subtopic.name', read_only=True)
     topic_name = serializers.CharField(source='topic.name', read_only=True)    
-    
+    userLikes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    userViews = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    is_liked_by_user = serializers.SerializerMethodField()
+    is_viewed_by_user = serializers.SerializerMethodField()
+    is_saved_by_user = serializers.SerializerMethodField()
     class Meta:
         """
         Meta options for the VideoSerializer class.
         """
         model = Video
-        fields = ["id", "video_id", "title", "topic", "topic_name", "subtopic", "subtopic_name", "description", "tags", "duration", "publishedAt", "likes", "views"]
+        fields = ["id", "video_id", "title", "topic", "topic_name", "subtopic", "subtopic_name", "description", "tags", "duration", "publishedAt", "likes", "userLikes", "is_liked_by_user", "views", "is_viewed_by_user", "userViews", "is_saved_by_user"]
+        
+    def get_is_liked_by_user(self, obj):
+        """
+        Check if the user has liked the video.
+        """
+        user = self.context.get('request').user
+        return user in obj.userLikes.all() if user.is_authenticated else False
+    
+    def get_is_viewed_by_user(self, obj):
+        """
+        Check if the user has viewed the video.
+        """
+        user = self.context.get('request').user
+        return user in obj.userViews.all() if user.is_authenticated else False
+    
+    def get_is_saved_by_user(self, obj):
+        """
+        Check if the user has saved the video.
+        """
+        user = self.context.get('request').user
+        return user in obj.userSaved.all() if user.is_authenticated else False
 
 class UserSavedVideoSerializer(serializers.ModelSerializer):
     """
