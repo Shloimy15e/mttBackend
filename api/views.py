@@ -64,7 +64,7 @@ class VideoViewSet(ModelViewSet):
 
     serializer_class = VideoSerializer
     queryset = VideoSerializer.Meta.model.objects.all()
-    permission_classes = [IsAdminUser | AllowAny]
+    permission_classes = [IsAdminUser | AllowAny | IsAuthenticated]
 
     def get_permissions(self):
         if self.action in [
@@ -76,6 +76,8 @@ class VideoViewSet(ModelViewSet):
             "delete_all",
         ]:
             return [IsAdminUser()]
+        elif self.action in ["like", "save", "view",]:
+            return [IsAuthenticated()]
         return [AllowAny()]
 
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
