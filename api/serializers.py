@@ -96,7 +96,7 @@ class VideoSerializer(serializers.ModelSerializer):
         Check if the user has saved the video.
         """
         user = self.context.get('request').user
-        return user in obj.userSaved.all() if user.is_authenticated else False
+        return user in obj.userSaves.all() if user.is_authenticated else False
 
 class UserSavedVideoSerializer(serializers.ModelSerializer):
     """
