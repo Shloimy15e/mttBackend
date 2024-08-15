@@ -1,6 +1,7 @@
 from django.db import models
 from topics.models import Topic
 from topics.models import Subtopic
+from django.contrib.auth import get_user_model
 
 
 # Create your models here.
@@ -33,7 +34,10 @@ class Video(models.Model):
     duration = models.CharField(max_length=50, blank=True)
     publishedAt = models.CharField(max_length=50, blank=True)
     likes = models.IntegerField(default=0)
+    userLikes = models.ManyToManyField(get_user_model(), related_name='liked_videos', blank=True)
+    userSaves = models.ManyToManyField(get_user_model(), related_name='saved_videos', blank=True)
     views = models.IntegerField(default=0)
+    userViews = models.ManyToManyField(get_user_model(), related_name='viewed_videos', blank=True)
 
     def __str__(self):
         return f"{self.title} - {self.subtopic}"
