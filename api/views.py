@@ -114,11 +114,11 @@ class VideoViewSet(ModelViewSet):
         """
         video = self.get_object()
         user = request.user
-        if user in video.userSaved.all():
-            video.userSaved.remove(user)
+        if user in video.userSaves.all():
+            video.userSaves.remove(user)
             return Response({"detail": "Video unsaved"}, status=status.HTTP_200_OK)
         else:
-            video.userSaved.add(user)
+            video.userSaves.add(user)
             return Response({"detail": "Video saved"}, status=status.HTTP_200_OK)
         
     @action(detail=True, methods=["post"])
