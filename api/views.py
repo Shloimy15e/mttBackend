@@ -133,7 +133,7 @@ class VideoViewSet(ModelViewSet):
         video.userViews.add(user)
         return Response({"detail": "Video viewed"}, status=status.HTTP_200_OK)
 
-   def create(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         """
         create one or more video instances.
         """
@@ -149,7 +149,7 @@ class VideoViewSet(ModelViewSet):
                         created_videos.append(serializer.data)
                     except Exception as e:
                         errors.append({"video": video, "error": str(e)})
-
+        
                 if errors and created_videos:
                     return Response(
                         {"created_videos": created_videos, "errors": errors},
