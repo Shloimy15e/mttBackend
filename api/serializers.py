@@ -77,6 +77,18 @@ class VideoSerializer(serializers.ModelSerializer):
         model = Video
         fields = ["id", "video_id", "title", "topic", "topic_name", "subtopic", "subtopic_name", "description", "tags", "duration", "publishedAt", "likes", "userLikes", "is_liked_by_user", "views", "is_viewed_by_user", "userViews", "is_saved_by_user"]
         
+    def get_userLikes(self, obj):
+        """
+        Get the count of userLikes for the video.
+        """
+        return obj.userLikes.count()        
+    
+    def get_userViews(self, obj):
+        """
+        Get the count of userViews for the video.
+        """
+        return obj.userViews.count()
+
     def get_is_liked_by_user(self, obj):
         """
         Check if the user has liked the video.
