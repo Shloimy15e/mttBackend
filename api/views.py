@@ -133,38 +133,7 @@ class VideoViewSet(ModelViewSet):
         video.userViews.add(user)
         return Response({"detail": "Video viewed"}, status=status.HTTP_200_OK)
 
-    def filter_queryset(self, queryset):
-        if search_term := self.request.query_params.get("search", ""):
-            queryset = (
-                queryset.filter(
-                    Q(title__icontains=search_term)  # Case-insensitive contains
-                    | Q(topic__name__icontains=search_term)
-                    | Q(subtopic__name__icontains=search_term)
-                    | Q(description__icontains=search_term)
-                    | Q(tags__name__icontains=search_term)
-                )
-                .annotate(
-                    custom_rank=Case(
-                        When(title__iexact=search_term, then=5),  # Exact title match
-                        When(tags__name__iexact=search_term, then=4),  # Exact tag match
-                        When(title__icontains=search_term, then=3),  # Title contains
-                        When(
-                            description__icontains=search_term, then=2
-                        ),  # Description contains
-                        When(
-                            topic__name__icontains=search_term, then=1
-                        ),  # Topic contains
-                        When(
-                            subtopic__name__icontains=search_term, then=1
-                        ),  # Subtopic contains
-                        Else=0,
-                    )
-                )
-                .order_by("-custom_rank")
-            )
-        return queryset
-
-    def create(self, request, *args, **kwargs):
+   def create(self, request, *args, **kwargs):
         """
         create one or more video instances.
         """
