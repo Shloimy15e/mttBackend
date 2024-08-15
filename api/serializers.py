@@ -65,8 +65,8 @@ class VideoSerializer(serializers.ModelSerializer):
     
     subtopic_name = serializers.CharField(source='subtopic.name', read_only=True)
     topic_name = serializers.CharField(source='topic.name', read_only=True)    
-    userLikes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    userViews = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    userLikes = serializers.SerializerMethodField()
+    userViews = serializers.SerializerMethodField()
     is_liked_by_user = serializers.SerializerMethodField()
     is_viewed_by_user = serializers.SerializerMethodField()
     is_saved_by_user = serializers.SerializerMethodField()
@@ -81,7 +81,7 @@ class VideoSerializer(serializers.ModelSerializer):
         """
         Get the count of userLikes for the video.
         """
-        return obj.userLikes.count()        
+        return obj.userLikes.count()
     
     def get_userViews(self, obj):
         """
