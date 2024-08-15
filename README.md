@@ -56,6 +56,12 @@ Content APIs
     * DELETE destroys instance
 * **api/videos/**
 * * GET lists all videos
+  * ?video_id
+  * ?search
+  * ?topic, ?topic__name, ?topic__name__iexact
+  * ?subtopic, ?subtopic__name
+  * ?views, ?views__gte, ?views__lte, ?views__range
+  * ?likes, ?likes__gte, ?likes__lte, ?likes__range
   * POST saves on or more videos
   * **/{id}/**
   * * GET retrives one video

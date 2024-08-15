@@ -1,5 +1,4 @@
-from django.contrib.auth import authenticate
-from django.shortcuts import get_object_or_404
+from django.db.models import Q, Case, When
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,6 +9,7 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 
 
 class CustomLimitOffsetPagination(LimitOffsetPagination):
@@ -26,7 +26,8 @@ from .serializers import SubtopicSerializer
 class TopicViewSet(ModelViewSet):
     """
     A viewset for the Topic model.
-    """ 
+    """
+
     serializer_class = TopicSerializer
     queryset = TopicSerializer.Meta.model.objects.all()
     filter_backends = [DjangoFilterBackend, OrderingFilter]
@@ -36,11 +37,13 @@ class TopicViewSet(ModelViewSet):
         "description": ["exact", "icontains"],
     }
     ordering_fields = ["id", "name"]
-    
+
+
 class SubtopicViewSet(ModelViewSet):
     """
     A viewset for the Subtopic model.
     """
+
     serializer_class = SubtopicSerializer
     queryset = SubtopicSerializer.Meta.model.objects.all()
     filter_backends = [DjangoFilterBackend, OrderingFilter]
@@ -52,8 +55,7 @@ class SubtopicViewSet(ModelViewSet):
         "topic__name": ["iexact"],
     }
     ordering_fields = ["id", "name", "topic"]
-    
-    
+
 
 class VideoViewSet(ModelViewSet):
     """
@@ -76,10 +78,10 @@ class VideoViewSet(ModelViewSet):
             return [IsAdminUser()]
         return [AllowAny()]
 
-    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     filterset_fields = {
         "topic": ["exact"],
-        "topic__name": ["exact", "iexact"],        
+        "topic__name": ["exact", "iexact"],
         "video_id": ["exact"],
         "subtopic": ["exact"],
         "subtopic__name": ["iexact"],
@@ -87,35 +89,80 @@ class VideoViewSet(ModelViewSet):
         "views": ["exact", "gte", "lte", "range"],
     }
     ordering_fields = ["likes", "views", "publishedAt"]
+    search_fields = ["title", "topic__name", "subtopic__name", "description", "tags"]
+
+    def filter_queryset(self, queryset):
+        if search_term := self.request.query_params.get("search", ""):
+            queryset = (
+                queryset.filter(
+                    Q(title__icontains=search_term)  # Case-insensitive contains
+                    | Q(topic__name__icontains=search_term)
+                    | Q(subtopic__name__icontains=search_term)
+                    | Q(description__icontains=search_term)
+                    | Q(tags__name__icontains=search_term)
+                )
+                .annotate(
+                    custom_rank=Case(
+                        When(title__iexact=search_term, then=5),  # Exact title match
+                        When(tags__name__iexact=search_term, then=4),  # Exact tag match
+                        When(title__icontains=search_term, then=3),  # Title contains
+                        When(
+                            description__icontains=search_term, then=2
+                        ),  # Description contains
+                        When(
+                            topic__name__icontains=search_term, then=1
+                        ),  # Topic contains
+                        When(
+                            subtopic__name__icontains=search_term, then=1
+                        ),  # Subtopic contains
+                        Else=0,
+                    )
+                )
+                .order_by("-custom_rank")
+            )
+        return queryset
 
     def create(self, request, *args, **kwargs):
         """
         create one or more video instances.
         """
         try:
-            videos = request.data.get("videos")
-            created_videos = []
-            errors = []
-            for video in videos:
+            if videos := request.data.get("videos"):
+                created_videos = []
+                errors = []
+                for video in videos:
+                    try:
+                        serializer = self.get_serializer(data=video)
+                        serializer.is_valid(raise_exception=True)
+                        self.perform_create(serializer)
+                        created_videos.append(serializer.data)
+                    except Exception as e:
+                        errors.append({"video": video, "error": str(e)})
+
+                if errors and created_videos:
+                    return Response(
+                        {"created_videos": created_videos, "errors": errors},
+                        status=status.HTTP_206_PARTIAL_CONTENT,
+                    )
+                elif created_videos:
+                    return Response(
+                        {"created_videos": created_videos},
+                        status=status.HTTP_201_CREATED,
+                    )
+                else:
+                    return Response(
+                        {"errors": errors}, status=status.HTTP_400_BAD_REQUEST
+                    )
+            else:
                 try:
-                    serializer = self.get_serializer(data=video)
+                    serializer = self.get_serializer(data=request.data)
                     serializer.is_valid(raise_exception=True)
                     self.perform_create(serializer)
-                    created_videos.append(serializer.data)
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
                 except Exception as e:
-                    errors.append({"video": video, "error": str(e)})
-
-            if errors and created_videos:
-                return Response(
-                    {"created_videos": created_videos, "errors": errors},
-                    status=status.HTTP_206_PARTIAL_CONTENT,
-                )
-            elif created_videos:
-                return Response(
-                    {"created_videos": created_videos}, status=status.HTTP_201_CREATED
-                )
-            else:
-                return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response(
+                        {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST
+                    )
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

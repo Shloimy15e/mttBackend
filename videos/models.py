@@ -29,7 +29,7 @@ class Video(models.Model):
     topic = models.ForeignKey(Topic, on_delete=models.PROTECT, related_name="videos")
     subtopic = models.ForeignKey(Subtopic, on_delete=models.PROTECT, related_name="videos")
     description = models.TextField(blank=True, null=True)    
-    tags = models.JSONField(default=list)
+    tags = models.JSONField(default=list, null=True, blank=True)
     duration = models.CharField(max_length=50, blank=True)
     publishedAt = models.CharField(max_length=50, blank=True)
     likes = models.IntegerField(default=0)
