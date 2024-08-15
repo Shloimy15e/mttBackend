@@ -90,6 +90,46 @@ class VideoViewSet(ModelViewSet):
     }
     ordering_fields = ["likes", "views", "publishedAt"]
     search_fields = ["title", "topic__name", "subtopic__name", "description", "tags"]
+    
+    @action(detail=True, methods=["post"])
+    def like(self, request, pk=None):
+        """
+        Like a video.
+        """
+        video = self.get_object()
+        user = request.user
+        if user in video.userLikes.all():
+            video.userLikes.remove(user)
+            return Response({"detail": "Video unliked"}, status=status.HTTP_200_OK)
+        else:
+            video.userLikes.add(user)
+            return Response({"detail": "Video liked"}, status=status.HTTP_200_OK)
+        
+    @action(detail=True, methods=["post"])
+    def save(self, request, pk=None):
+        """
+        Save a video.
+        """
+        video = self.get_object()
+        user = request.user
+        if user in video.userSaved.all():
+            video.userSaved.remove(user)
+            return Response({"detail": "Video unsaved"}, status=status.HTTP_200_OK)
+        else:
+            video.userSaved.add(user)
+            return Response({"detail": "Video saved"}, status=status.HTTP_200_OK)
+        
+    @action(detail=True, methods=["post"])
+    def view(self, request, pk=None):
+        """
+        View a video.
+        """
+        video = self.get_object()
+        user = request.user
+        if user in video.userViews.all():
+            return Response({"detail": "Video already viewed"}, status=status.HTTP_200_OK)
+        video.userViews.add(user)
+        return Response({"detail": "Video viewed"}, status=status.HTTP_200_OK)
 
     def filter_queryset(self, queryset):
         if search_term := self.request.query_params.get("search", ""):
