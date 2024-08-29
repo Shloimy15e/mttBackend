@@ -77,9 +77,9 @@ class VideoSerializer(serializers.ModelSerializer):
         model = Video
         fields = ["id", "video_id", "title", "topic", "topic_name", "subtopic", "subtopic_name", "description", "tags", "duration", "publishedAt", "likes", "userLikes", "views", "userViews"]
         extra_kwargs = {
-            is_liked_by_user: {'read_only': True},
-            is_viewed_by_user: {'read_only': True},
-            is_saved_by_user: {'read_only': True}
+            'is_liked_by_user': {'read_only': True},
+            'is_viewed_by_user': {'read_only': True},
+            'is_saved_by_user': {'read_only': True}
         }
         
     def get_userLikes(self, obj):
