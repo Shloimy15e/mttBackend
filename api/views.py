@@ -10,6 +10,9 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
+from django_filters import rest_framework as filters
+
+from videos.models import Video
 
 
 class CustomLimitOffsetPagination(LimitOffsetPagination):
@@ -57,6 +60,48 @@ class SubtopicViewSet(ModelViewSet):
     ordering_fields = ["id", "name", "topic"]
 
 
+class VideoFilter(filters.FilterSet):
+    is_saved_by_user = filters.BooleanFilter(method="filter_is_saved_by_user")
+    is_liked_by_user = filters.BooleanFilter(method="filter_is_liked_by_user")
+    is_viewed_by_user = filters.BooleanFilter(method="filter_is_viewed_by_user")
+
+    class Meta:
+        model = Video
+        fields = {
+            "topic": ["exact"],
+            "topic__name": ["exact", "iexact"],
+            "video_id": ["exact"],
+            "subtopic": ["exact"],
+            "subtopic__name": ["iexact"],
+            "likes": ["exact", "gte", "lte", "range"],
+            "views": ["exact", "gte", "lte", "range"],
+        }
+
+    def filter_is_saved_by_user(self, queryset, name, value):
+        user = self.request.user
+        if user.is_authenticated:
+            if value:
+                return queryset.filter(userSaves=user)
+            return queryset.exclude(userSaves=user)
+        return queryset.none()  # If user is not authenticated, return an empty queryset
+
+    def filter_is_liked_by_user(self, queryset, name, value):
+        user = self.request.user
+        if user.is_authenticated:
+            if value:
+                return queryset.filter(userLikes=user)
+            return queryset.exclude(userLikes=user)
+        return queryset.none()  # If user is not authenticated, return an empty queryset
+
+    def filter_is_viewed_by_user(self, queryset, name, value):
+        user = self.request.user
+        if user.is_authenticated:
+            if value:
+                return queryset.filter(userViews=user)
+            return queryset.exclude(userViews=user)
+        return queryset.none()  # If user is not authenticated, return an empty queryset
+
+
 class VideoViewSet(ModelViewSet):
     """
     A viewset for the Video model.
@@ -76,23 +121,19 @@ class VideoViewSet(ModelViewSet):
             "delete_all",
         ]:
             return [IsAdminUser()]
-        elif self.action in ["like", "save", "view",]:
+        elif self.action in [
+            "like",
+            "save",
+            "view",
+        ]:
             return [IsAuthenticated()]
         return [AllowAny()]
 
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
-    filterset_fields = {
-        "topic": ["exact"],
-        "topic__name": ["exact", "iexact"],
-        "video_id": ["exact"],
-        "subtopic": ["exact"],
-        "subtopic__name": ["iexact"],
-        "likes": ["exact", "gte", "lte", "range"],
-        "views": ["exact", "gte", "lte", "range"],
-    }
+    filterset_class = VideoFilter
     ordering_fields = ["likes", "views", "publishedAt"]
     search_fields = ["title", "topic__name", "subtopic__name", "description", "tags"]
-    
+
     @action(detail=True, methods=["post"])
     def like(self, request, pk=None):
         """
@@ -106,7 +147,7 @@ class VideoViewSet(ModelViewSet):
         else:
             video.userLikes.add(user)
             return Response({"detail": "Video liked"}, status=status.HTTP_200_OK)
-        
+
     @action(detail=True, methods=["post"])
     def save(self, request, pk=None):
         """
@@ -120,7 +161,7 @@ class VideoViewSet(ModelViewSet):
         else:
             video.userSaves.add(user)
             return Response({"detail": "Video saved"}, status=status.HTTP_200_OK)
-        
+
     @action(detail=True, methods=["post"])
     def view(self, request, pk=None):
         """
@@ -129,7 +170,9 @@ class VideoViewSet(ModelViewSet):
         video = self.get_object()
         user = request.user
         if user in video.userViews.all():
-            return Response({"detail": "Video already viewed"}, status=status.HTTP_200_OK)
+            return Response(
+                {"detail": "Video already viewed"}, status=status.HTTP_200_OK
+            )
         video.userViews.add(user)
         return Response({"detail": "Video viewed"}, status=status.HTTP_200_OK)
 
@@ -149,7 +192,7 @@ class VideoViewSet(ModelViewSet):
                         created_videos.append(serializer.data)
                     except Exception as e:
                         errors.append({"video": video, "error": str(e)})
-        
+
                 if errors and created_videos:
                     return Response(
                         {"created_videos": created_videos, "errors": errors},
