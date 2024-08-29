@@ -89,6 +89,9 @@ class VideoViewSet(ModelViewSet):
         "subtopic__name": ["iexact"],
         "likes": ["exact", "gte", "lte", "range"],
         "views": ["exact", "gte", "lte", "range"],
+        "is_liked_by_user": ["exact"],
+        "is_saved_by_user": ["exact"],
+        "is_viewed_by_user": ["exact"]
     }
     ordering_fields = ["likes", "views", "publishedAt"]
     search_fields = ["title", "topic__name", "subtopic__name", "description", "tags"]
