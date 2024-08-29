@@ -75,7 +75,7 @@ class VideoSerializer(serializers.ModelSerializer):
         Meta options for the VideoSerializer class.
         """
         model = Video
-        fields = ["id", "video_id", "title", "topic", "topic_name", "subtopic", "subtopic_name", "description", "tags", "duration", "publishedAt", "likes", "userLikes", "views", "userViews"]
+        fields = ["id", "video_id", "title", "topic", "topic_name", "subtopic", "subtopic_name", "description", "tags", "duration", "publishedAt", "likes", "userLikes", "is_liked_by_user", "views", "is_viewed_by_user", "userViews", "is_saved_by_user"]
         extra_kwargs = {
             'is_liked_by_user': {'read_only': True},
             'is_viewed_by_user': {'read_only': True},
