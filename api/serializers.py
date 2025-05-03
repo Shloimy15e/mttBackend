@@ -63,19 +63,40 @@ class VideoSerializer(serializers.ModelSerializer):
         dict: Serialized data for the Video model fields.
     """
     
-    subtopic_name = serializers.CharField(source='subtopic.name', read_only=True)
-    topic_name = serializers.CharField(source='topic.name', read_only=True)    
+    subtopics_data = serializers.SerializerMethodField()
+    topics_data = serializers.SerializerMethodField()
     userLikes = serializers.SerializerMethodField()
     userViews = serializers.SerializerMethodField()
     is_liked_by_user = serializers.SerializerMethodField()
     is_viewed_by_user = serializers.SerializerMethodField()
     is_saved_by_user = serializers.SerializerMethodField()
+
+    def get_subtopics_data(self, obj):
+        """
+        Get the subtopics data for the video.
+        """
+        return [{"id": subtopic.id, "name": subtopic.name, "topic": {"id": subtopic.topic.id, "name": subtopic.topic.name}} 
+                for subtopic in obj.subtopics.all()]
+
+    def get_topics_data(self, obj):
+        """
+        Get unique topics data from the video's subtopics.
+        """
+        topics = {}
+        for subtopic in obj.subtopics.all():
+            topic = subtopic.topic
+            if topic.id not in topics:
+                topics[topic.id] = {"id": topic.id, "name": topic.name}
+        return list(topics.values())
+
     class Meta:
         """
         Meta options for the VideoSerializer class.
         """
         model = Video
-        fields = ["id", "video_id", "title", "topic", "topic_name", "subtopic", "subtopic_name", "description", "tags", "duration", "publishedAt", "likes", "userLikes", "is_liked_by_user", "views", "is_viewed_by_user", "userViews", "is_saved_by_user"]
+        fields = ["id", "video_id", "title", "subtopics", "subtopics_data", "topics_data", "description", 
+                 "tags", "duration", "publishedAt", "likes", "userLikes", "is_liked_by_user", 
+                 "views", "is_viewed_by_user", "userViews", "is_saved_by_user"]
         
     def get_userLikes(self, obj):
         """
