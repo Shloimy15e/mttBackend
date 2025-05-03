@@ -12,8 +12,6 @@ class Video(models.Model):
     Attributes:
         video_id (str): The unique identifier for the video.
         title (str): The title of the video.
-        topic (str): The topic of the video.
-        subtopic (str): The subtopic of the video.
         description (str): The description of the video.
         tags (list): An array of strings representing the tags for the video.        
         duration (str): The duration of the video in ISO 8601 format.
@@ -27,8 +25,7 @@ class Video(models.Model):
 
     video_id = models.CharField(max_length=255, unique=True)
     title = models.TextField(max_length=255)    
-    topic = models.ForeignKey(Topic, on_delete=models.PROTECT, related_name="videos")
-    subtopic = models.ForeignKey(Subtopic, on_delete=models.PROTECT, related_name="videos")
+    subtopics = models.ManyToManyField(Subtopic, related_name="videos")
     description = models.TextField(blank=True, null=True)    
     tags = models.JSONField(default=list, null=True, blank=True)
     duration = models.CharField(max_length=50, blank=True)
@@ -40,4 +37,4 @@ class Video(models.Model):
     userViews = models.ManyToManyField(get_user_model(), related_name='viewed_videos', blank=True)
 
     def __str__(self):
-        return f"{self.title} - {self.subtopic}"
+        return f"{self.title} - {', '.join(str(subtopic) for subtopic in self.subtopics.all())}"

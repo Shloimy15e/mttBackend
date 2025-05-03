@@ -64,15 +64,15 @@ class VideoFilter(filters.FilterSet):
     is_saved_by_user = filters.BooleanFilter(method="filter_is_saved_by_user")
     is_liked_by_user = filters.BooleanFilter(method="filter_is_liked_by_user")
     is_viewed_by_user = filters.BooleanFilter(method="filter_is_viewed_by_user")
+    topic = filters.NumberFilter(field_name="subtopics__topic", distinct=True)
+    topic_name = filters.CharFilter(field_name="subtopics__topic__name", lookup_expr="iexact", distinct=True)
 
     class Meta:
         model = Video
         fields = {
-            "topic": ["exact"],
-            "topic__name": ["exact", "iexact"],
             "video_id": ["exact"],
-            "subtopic": ["exact"],
-            "subtopic__name": ["iexact"],
+            "subtopics": ["exact"],
+            "subtopics__name": ["iexact"],
             "likes": ["exact", "gte", "lte", "range"],
             "views": ["exact", "gte", "lte", "range"],
         }
@@ -132,7 +132,7 @@ class VideoViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     filterset_class = VideoFilter
     ordering_fields = ["likes", "views", "publishedAt"]
-    search_fields = ["title", "topic__name", "subtopic__name", "description", "tags"]
+    search_fields = ["title", "topic__name", "subtopics__name", "description", "tags"]
 
     @action(detail=True, methods=["post"])
     def like(self, request, pk=None):
